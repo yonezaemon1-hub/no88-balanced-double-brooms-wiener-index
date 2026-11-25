@@ -1,0 +1,943 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+  10pt,
+  a4paper,
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+  \setmainfont[]{STIX}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=23mm]{geometry}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+\usepackage[bidi=basic]{babel}
+\else
+\usepackage[bidi=default]{babel}
+\fi
+\babelprovide[main,import]{english}
+\ifPDFTeX
+\else
+\babelfont{rm}[]{STIX}
+\fi
+% get rid of language-specific shorthands (see #6817):
+\let\LanguageShortHands\languageshorthands
+\def\languageshorthands#1{}
+\usepackage{microtype}
+\setlength{\emergencystretch}{3em}
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={The Sharp Diameter Threshold for Balanced Double Brooms Maximizing the Wiener Index of Trees},
+  pdfauthor={Ryutaro Yonezu --- Independent Researcher},
+  pdflang={en},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={blue},
+  pdfcreator={LaTeX via pandoc}}
+
+\title{The Sharp Diameter Threshold for Balanced Double Brooms
+Maximizing the Wiener Index of Trees}
+\author{Ryutaro Yonezu --- Independent Researcher}
+\date{Research No.88 · Version 1.0 · 26 November 2026}
+
+\begin{document}
+\maketitle
+
+\textbf{Abstract.} For a tree of order \(n\) and diameter \(d\), put
+\(k=n-d-1\). We give a sharp persistent uniqueness threshold for the
+balanced double broom: for \(k\ge7\) it is
+\(D(k)=2\lfloor\lceil k/2\rceil^2/4\rfloor+3+(k\bmod2)\). The proof uses
+a tight attachment reduction, exact distance comparisons, and elementary
+interval inequalities, with no program-generated enumeration as a proof
+premise. We also give an exact deficit-dependent dynamic programme using
+\(O((k+1)^3)\) integer operations, an implicit description of all
+equality cases, a balanced-double-broom uniqueness test, and an
+algorithm for the persistent threshold at each fixed deficit. The latter
+results are presented as supporting algorithmic results, not as claims
+of priority for dynamic programming itself.
+
+\textbf{Keywords:} Wiener index; trees; diameter deficit; balanced
+double broom; extremal trees; exact algorithms.
+
+\textbf{Status:} AI-assisted preprint. Independent AI reviews:
+CONDITIONAL PASS (Theorems 1--4 and separately Theorem 5). NOT HUMAN
+PEER REVIEWED. NOVELTY INCONCLUSIVE. REFERENCES PARTIAL. All rights
+reserved.
+
+\section{Introduction and scope}\label{introduction-and-scope}
+
+Let \(W(T)=\sum_{\{u,v\}\subset V(T)}d_T(u,v)\), with unordered pairs,
+and let \(M(n,d)\) be its maximum over finite simple unweighted trees of
+order \(n\) and diameter \(d\). The balanced double broom \(B(k,d)\),
+for \(d\ge3\), is obtained by attaching \(\lfloor k/2\rfloor\) and
+\(\lceil k/2\rceil\) additional leaves at positions 1 and \(d-1\) of a
+diameter path. For fixed \(k\), define \(D(k)\) as the least integer
+\(D\ge3\) such that \(B(k,d)\) is the unique maximizing isomorphism
+class for every \(d\ge D\).
+
+The prior sufficient bound of Borovićanin et al.~{[}1, Theorem 2.13{]}
+is \(n\le d-2+4\lfloor\sqrt{(d-1)/2}\rfloor\) with \(n\ge1636\). Their
+Proposition 2.15 gives a triple-broom obstruction for
+\(n\ge d+4+4\lfloor\sqrt{(d-1)/2}\rfloor\). Eventual uniqueness, the
+peripheral-leaf condition, and the idea of a triple-broom competitor are
+not claimed as new. The present contribution under investigation is the
+exact persistent boundary, especially the uniform upper bound over all
+competing trees. The problem for general connected graphs is not
+addressed.
+
+\section{Part I. Sharp persistent uniqueness threshold (Theorem
+5)}\label{part-i.-sharp-persistent-uniqueness-threshold-theorem-5}
+
+\textbf{Theorem 5.} For \(k\ge7\), put \(m=\lceil k/2\rceil\) and
+\(\varepsilon=2m-k\). Then
+
+\[\boxed{D(k)=2\left\lfloor\frac{m^2}{4}\right\rfloor+3+\varepsilon.}\]
+
+For all integers \(d\ge D(k)\) the balanced double broom is the unique
+maximizer up to isomorphism. At \(d=D(k)-1\) a distinct tree has the
+same Wiener index as the balanced double broom, so the latter cannot be
+uniquely maximizing there. It need not be a global maximizer at that
+preceding diameter.
+
+In the proof, \(\varepsilon\) denotes \(\varepsilon\). The following
+proof retains the section and equation numbers of the independently
+reviewed v0.13 text. The notation and typography have been edited for
+publication; the frozen proof is included in the reproduction archive.
+The proof is analytic with finite elementary algebraic cases; the
+optional scripts check the identities and provide finite corroboration.
+They are not premises of the proof.
+
+\subsection{1. Tight branches and exact
+comparison}\label{tight-branches-and-exact-comparison}
+
+Choose a diameter path with vertices indexed by \(0,\ldots,d\). For any
+off-path component, let its size be s and height h measured from the
+path attachment (including the attachment edge). The feasible positions
+are exactly \(h\le x\le d-h\): distances to the two endpoints give
+necessity; for distinct branches at \(x\le y\), their cross distances
+are at most \(h_x+y-x+h_y\le d\), and distances within a branch are at
+most \(2h\le d\). The original path preserves diameter d.~Holding all
+other components fixed, the x-dependent part of W is \(s(x^2-dx)\) plus
+a nonnegative sum of multiples of \(|x-y|\) and a constant. This is
+strictly convex. Hence every maximizer is tight: each component is
+attached at h or d-h. Assign the components left/right accordingly
+(arbitrarily for a middle attachment). Distinct components sharing an
+attachment are kept distinct.
+
+Write \(H_i=h_i-1\), \(a_v=h_i-\operatorname{depth}(v)\) (depth from the
+path), \(A_i=\sum_{v\in T_i}a_v\), and \(A=\sum_i A_i\), where \(T_i\)
+denotes the off-path component indexed by \(i\). A deepest path within
+component i has \(h_i\) vertices and gives \(A_i\ge H_i(H_i+1)/2\). A
+component with H=0 is a single leaf. Let \(L+R=k\), and
+\(I=\lfloor k^2/4\rfloor-LR\). Compare with the possibly unbalanced
+broom \(B_{L,R}\), with L and R extra leaves at positions 1 and d-1. The
+excess of the distances from v to the diameter path over those from a
+broom leaf is \(H_i(H_i+3)-(d+1)a_v\), by summing
+\(|x-j|+\operatorname{depth}(v)\) over \(j=0,\ldots,d\). For same-side
+pairs in distinct branches the excess is \(2\max(H_i,H_j)-a_v-a_w\); for
+a pair in the same branch the excess is
+\(2H_i-a_v-a_w-2\operatorname{lca}(v,w)\), where
+\(\operatorname{lca}(v,w)\) is the depth of their lowest common ancestor
+measured from the attachment. For opposite sides the excess is
+\(-a_v-a_w\). Thus \(W(T)-W(B_{L,R})=P-(d+k)A\), where P is the sum of
+\(s_i H_i(H_i+3)\) and twice the sum of \(\max(H_i,H_j)\) over all
+same-side pairs (including \(H_i\) for within-branch pairs), minus twice
+the within-branch LCA sum. \(W(B_{L,R})-W(B)=-(d-2)I\), by comparing
+same-side and cross-side leaf pairs.
+
+Write \(s_i=|V(T_i)|\) and let \(M_i\) be the total size of the side
+containing \(T_i\). For a side of size \(M\), define
+
+\[P_i(M)=s_i[H_i(H_i+2+2M)+1-(H_i+1)s_i].\]
+
+Using \(\max(H_i,H_j)\le H_i+H_j\) and \(\operatorname{lca}\ge1\) gives
+
+\[W(T)-W(B)\le -(d-2)I+\sum_i[P_i(M_i)-(d+k)A_i].\tag{1}\]
+
+For \(H=0\), \(s=1\) and \(P_i=0\). For later use the exact improvement
+to (1) is to subtract \(2\min(H_i,H_j)s_i s_j\) for each pair of
+distinct branches on the same side, and \(2(\operatorname{lca}(v,w)-1)\)
+for each within-branch pair.
+
+\subsection{2. Symbolic proof for m≥8}\label{symbolic-proof-for-m8}
+
+Put \(Q=2\lfloor(m+2)^2/4\rfloor\), \(c_0=Q+1\), \(D=Q-k+1\). This
+agrees with the displayed threshold \(D(k)\); \(c_0\ge(m+2)^2/2\), and
+\(d-2\ge D-2\ge m^2/2\) for d≥D. Write \(c=d+k\ge c_0\).
+
+For balanced sides or a light side M≤m, we use t=0 and budget share
+zero; \(P_i\)(M)≤\(P_i\)(m). Otherwise the heavy side has M=m+t,
+1≤t≤k-m≤m, and \(I=t(t+\varepsilon)\ge t^2\). Assign to its component of
+size s the share s(d-2)I/M of the imbalance penalty. Its per-vertex
+budget \(b=(d-2)I/M\) satisfies \(b\ge mt^2/4\), since M≤2m. When t=1
+the stronger \(b\ge m^2/[2(m+1)]\) holds. Also \(P_i(M)=P_i(m)+2Hst\).
+It suffices to show, for H≥1,
+
+\[P_i(m)+s(2Ht-b)<c A_i.\tag{2}\]
+
+Here for t=0 take b=0. For H=0 the contribution after its budget share
+is nonpositive (strict on a heavy side).
+
+H=1: \(P_i(m)=2s(m+2-s)\le Q\), \(A_i\)≥1. If t≥1,
+\(2t-b\le 2t-mt^2/4\le0\); also true at t=0. Thus (2) holds with gap at
+least 1.
+
+H=2: for t=1, \(4t-b\le4-32/9=4/9\); for t≥2, \(4t-b\le4t-2t^2\le0\). At
+t=0 it is zero. Therefore the LHS of (2) is at most
+\(s(4m+9+4/9-3s)\le(4m+9+4/9)^2/12\). The ratio \((4m+9+4/9)/(m+2)\) is
+decreasing for m≥8 and at 8 is 373/90, whose square is less than 18. The
+last bound is strictly below \(3(m+2)^2/2\le c A_i\).
+
+H≥3: completing the square gives \(2Ht-mt^2/4\le4H^2/m\) for any real t
+(and the bound holds at t=0). The LHS of (2) is thus at most
+
+\[s[a-(H+1)s],\quad a=2Hm+H(H+2)+1+4H^2/m.\tag{3}\]
+
+For 3≤H≤17, \(a/(m+2)=2H+[H(H-2)+1+4H^2/m]/(m+2)\) is decreasing in m≥8.
+At m=8, \(a=(3H^2+36H+2)/2\). For the full real interval 3≤H≤17,
+
+\[400H(H+1)^2-(3H^2+36H+2)^2>0.\]
+
+Indeed, with H=3+14u, 0≤u≤1, its degree-four Bernstein coefficients are
+431,4645,91453/3,130085,9839, all positive. These coefficients can be
+verified by expanding \(\sum_{j=0}^4 b_j\binom4j u^j(1-u)^{4-j}\). Hence
+\(a^2<(m+2)^2H(H+1)^2\) and (3) ≤
+\(a^2/[4(H+1)]<(m+2)^2H(H+1)/4\le c A_i\).
+
+H≥18: s≥H+1 and s≤2m imply m≥10. Separate the H\^{}2 s term and use
+s≤2m: (3) ≤ (2m+8)H\^{}2 + {[}2H(m+1)+1{]}\^{}2/{[}4(H+1){]} ≤
+(2m+8)H\^{}2 + H\^{}2(m+2)\^{}2/(H+1). Subtracting this from c \(A_i\)
+leaves at least H\^{}2 times (m+2)\^{}2{[}(H+1)/(4H)-1/(H+1){]}-2m-8.
+The bracket is increasing for \(H\ge1\) (its derivative is
+\(1/(H+1)^2-1/(4H^2)\ge0\)); at H=18 it is 289/1368. For m≥10, writing
+m=10+x, the lower bound \((289/1368)(12+x)^2-28-2x\) has positive
+constant and linear coefficients and positive quadratic coefficient.
+This proves (2).
+
+In a balanced arrangement every nonleaf branch gives strict loss; all
+leaves give B. In an unbalanced arrangement the budget shares sum to
+(d-2)I and every heavy-side component gives strict loss after its share
+(including single leaves); light-side components contribute at most
+zero. Consequently all tight non-B trees are strictly inferior for d≥D.
+Every maximizer is tight, so this proves uniqueness.
+
+\subsection{3. Small range: a continuous-interval
+proof}\label{small-range-a-continuous-interval-proof}
+
+Section 2 covers m≥8, so consider 4≤m≤7. Write \(k=2m-\varepsilon\),
+\(D=2\lfloor m^2/4\rfloor+3+\varepsilon\). Use
+\(Q=2\lfloor(m+2)^2/4\rfloor\) as in Section 2. For each H≥1 put h=H+1,
+\(d_0\)=max(D,2h), q=\(d_0\)-2, c=\(d_0\)+k. These are lower bounds on
+the actual d-2 and d+k for a feasible branch. In particular c≥2(k-1),
+since c≥2 floor(m\^{}2/4)+2m+3 and 2 floor(m\^{}2/4)≥2m-5 for m≥4. Use
+M=m as an upper bound on light and balanced side sizes, and M=m+t for
+the heavy side, 1≤t≤k-m. The imbalance is \(I=t(t+\varepsilon)\).
+
+\subsubsection{3.1 Uniform height-one
+bound}\label{uniform-height-one-bound}
+
+In the notation of Section 1, H=1 gives \(P_i(m)=2s(m+2-s)\le Q\). With
+proportional budget s q I/(m+t), the extra per-vertex term is
+\(g=2t-qt(t+\varepsilon)/(m+t)\). For t≥1,
+\(q(t+\varepsilon)/(m+t)\ge q/(m+1)\ge2\) if m≥5; indeed q≥2
+floor(m\^{}2/4)+1 ≥2(m+1) for m≥5. For m=4, \(\varepsilon\)=1 the same
+quotient is at least 4. For m=4, \(\varepsilon\)=0, t≥2 it is at least
+3. Thus g≤0 in all these cases and also at t=0. Since \(c\ge Q+1\) and
+A≥1, there is strict loss. In the remaining m=4, \(\varepsilon\)=0, t=1
+case, g≤1/5 and the real quadratic maximum of s(12+1/5-2s) is
+3721/200\textless19=c.~This proves the desired inequality for every H=1
+branch, using proportional charging. Full charging, if chosen, only
+strengthens the bound. No size or imbalance enumeration is needed.
+
+\subsubsection{3.2 Uniform extra-vertex deficit lemma (all
+H≥1)}\label{uniform-extra-vertex-deficit-lemma-all-h1}
+
+Select a deepest path of h off-path vertices in a branch of size s=h+e.
+Let E be the sum of deficits h-depth(v) over its e extra vertices, so
+A=Hh/2+E. The mandatory within-path LCA loss beyond
+\(\operatorname{lca}\ge1\) is \(2\binom h3\). Let \(L_{\rm extra}\)
+denote the remaining within-branch LCA loss beyond
+\(\operatorname{lca}\ge1\), over pairs involving at least one extra
+vertex. For j in {[}1,h{]}, define
+
+\[K(j)=e(j-1)(2h-j+e-1),\quad j_0=\max(1,h-e),\quad j_1=\max(1,h-2),\]
+\[J=e(H-1)(H+e+1),\quad K_0=K(j_0),\quad K_1=K(j_1).\]
+
+If every extra vertex meets the chosen path at depth at least j, every
+extra/path pair has LCA depth at least min(i,j) for path depth i, and
+every extra/extra pair has LCA depth at least j. Summing twice the
+excess over depth 1 gives K(j).
+
+For arbitrary E, each extra vertex v of deficit a meets the path at
+depth at least max(1,h-e-a), because at most e vertices on its path lie
+outside the chosen path. Consequently \(L_{\rm extra}\)≥\(K_0\)-2(s-1)E:
+an extra/path pair's loss relative to the \(j_0\) bound is at most 2a,
+and an extra/extra pair's loss is at most 2(a+a'). Since c≥2(s-1),
+cE+\(L_{\rm extra}\)≥\(K_0\).
+
+If E=0, all extra vertices have depth h and their parents are on the
+path at depth h-1. Hence \(L_{\rm extra}\)=J. If E=1, the only extra
+vertex with positive deficit has depth h-1; all others have depth h. A
+depth-(h-1) extra vertex must attach directly to the path at depth h-2,
+and a depth-h extra vertex either attaches directly to the path or has
+that unique extra vertex as parent. (When h=2 and E=1 is infeasible, the
+implication is vacuous.) Thus all extra vertices meet the path at depth
+at least \(j_1\) and cE+\(L_{\rm extra}\)≥c+\(K_1\). If E≥2,
+\(L_{\rm extra}\)≥0 and the earlier inequality gives
+cE+\(L_{\rm extra}\)≥max(2c,\(K_0\)+2(c-2(s-1))). Combining these
+disjoint cases with the bound \(K_0\) valid for all E yields the uniform
+lower bound
+
+\[Z(s,H,c)=\max\{K_0,\min[J,c+K_1,\max(2c,K_0+2(c-2(s-1)))]\}\le cE+L_{\rm extra}.\tag{4}\]
+
+It is nondecreasing in c and is valid for every branch shape, including
+e=0. This uniform estimate avoids separate bounds for exceptional branch
+shapes.
+
+\subsubsection{3.3 Two budget rules}\label{two-budget-rules}
+
+Let a=H(H+2+2m)+1, \(C=-cHh/2-2\binom h3\), u=-h s\^{}2+a s+C-Z(s,H,c).
+By (1) and (4), this branch's contribution before charging imbalance is
+at most u+2Hst. For light sides use t=0 (\(P_i\)(M)≤\(P_i\)(m)). A leaf
+has zero contribution before budget. For heavy sides use either:
+
+\begin{itemize}
+\tightlist
+\item
+  Proportional rule: charge s q I/(m+t), giving u+s g\_H(t), where
+  \(g_H(t)=2Ht-qt(t+\varepsilon)/(m+t)\).
+\item
+  Large branch rule: if s\textgreater m and H≥k-s-1, charge the whole q
+  I, giving u+2Hst-qI.
+\end{itemize}
+
+There is at most one branch eligible for the large branch rule. If it
+exists, the remaining branches on its side have total M-s≤m-1 and each
+has height parameter J'≤k-s-1≤H. The exact cross correction from the
+large branch to another branch of size v is 2J'sv. Subtracting it
+changes that branch's \(P_i\)(M) precisely to \(P_i\)(M-s), so all
+remaining branches are bounded by the light-side inequality with no
+additional charge. Other cross corrections can only help. Thus it
+suffices to prove strict negativity for all nonleaf branches under the
+specified rule (large if eligible, otherwise proportional), including
+the light-side case t=0,s≤m. If no large branch is eligible, all
+proportional charges, using the actual diameter cost \(d-2\), sum to the
+imbalance cost \((d-2)I\); single leaves also lose strictly when
+t\textgreater0. When d\textgreater{}\(d_0\) for some branches, the
+actual penalty is (d-2)I, and these comparisons using smaller q remain
+sufficient: allocate the actual penalty first and bound each share by
+its corresponding lower q. With a large branch use the actual entire
+penalty and bound it by the corresponding qI. For t=0 only balanced
+leaves give equality. Hence strict local inequalities on the indicated
+domains imply global strict dominance.
+
+\subsubsection{3.4 Transfer every odd case from the even
+case}\label{transfer-every-odd-case-from-the-even-case}
+
+Fix m. Denote by \(q_e\),\(c_e\) the lower costs for \(k_e\)=2m, and
+\(q_o\),\(c_o\) those for \(k_o\)=2m-1. The quantities \(P_i\)(m), s, H,
+A and the actual LCA correction are identical. The admissible odd ranges
+for s,t are subsets of the even ranges. If 2h≤\(D_e\), then
+\(c_o\)=\(c_e\) and \(q_o\)=\(q_e\)+1; the odd imbalance t(t+1) is at
+least t\^{}2. An even full-charge eligible branch remains eligible in
+the odd case, and switching from a proportional charge to a full charge
+can only improve a bound. Thus the strict even local inequalities
+transfer.
+
+If 2h\textgreater{}\(D_e\), then \(c_o\)≥\(c_e\)-1 and
+\(q_o\)≥\(q_e\)=2h-2=2H. Since h is integral, h≥floor(m\^{}2/4)+2≥4m/3
+for m≥4 (use floor(m\^{}2/4)≥(m\^{}2-1)/4, and the resulting quadratic
+is positive and increasing from m=4). In particular h\textgreater m.
+Such a branch is heavy and s≥h\textgreater m; it is full-charge eligible
+in BOTH cases because h+s≥2m. The actual deficit of the branch satisfies
+
+\[A\le Hh/2+(s-h)H=Hs-Hh/2,\]
+
+by separating its deepest path from the other vertices. Since t≥s-m,
+
+\[q_e t\ge2H(s-m)\ge Hs-Hh/2\ge A,\]
+
+where the middle inequality follows from s≥h≥4m/3. In the odd case the
+extra full charge \(q_e\) t therefore compensates for the possible
+reduction of one in c.~Compare the actual local expression with its even
+counterpart before replacing the deficits and LCA by lower bounds. The
+odd expression is no larger than the even expression. The even proof
+covers all such branches, including the larger even admissible domain.
+This transfers all heights, not only those below \(D_e\)/2.
+
+It remains to prove the even cases. In Sections 3.5--3.8 set k=2m,
+\(\varepsilon\)=0. The height-one proof of 3.1 already handles these.
+
+\subsubsection{3.5 A real bound for the imbalance
+gain}\label{a-real-bound-for-the-imbalance-gain}
+
+For t in {[}0,m{]}, write g(t)=2Ht-q t\^{}2/(m+t). For any fixed t,
+completing the square yields \(g(t)\le H^2(m+t)/q\le 2mH^2/q\). If
+q\textgreater2H and g(t)\textgreater0, then (q-2H)t\textless2Hm and
+m+t\textless mq/(q-2H), so g(t)≤mH\^{}2/(q-2H); when g(t)≤0 the same
+upper bound is automatic. Both bounds remain true for real t. Also any
+G≥0 with q\textgreater2H and
+
+\[(G-2Hm)^2-4(q-2H)Gm\le0\]
+
+bounds g(t) for every real t≥0: multiply G-g(t) by m+t and complete the
+square. For a full-charge branch, for every real t,
+
+\[2Hst-qt^2\le H^2s^2/q.\]
+
+Thus the relaxed inequalities below prove strict loss simultaneously for
+entire real intervals, without searching integer t.
+
+\subsubsection{3.6 The even cases m=6,7, uniformly in
+height}\label{the-even-cases-m67-uniformly-in-height}
+
+Here q≥\(q_0\)=2 floor(m\^{}2/4)+1, c≥\(c_0\)=\(q_0\)+2+2m. Use
+\(q_0\)=19, \(c_0\)=33 for m=6, and \(q_0\)=25, \(c_0\)=41 for m=7. The
+full charge is at least the proportional charge on the feasible domain
+s≤m+t; hence a proportional bound suffices for both. Dropping Z but
+retaining the mandatory path LCA loss, the local expression is at most
+
+\[-hs^2+[H(H+2+2m)+1+G]s-c_0Hh/2-Hh(H-1)/3.\]
+
+Its maximum over all real s is negative if
+
+\[P(H)=2c_0H(H+1)^2+\frac43H(H+1)^2(H-1)-[H(H+2+2m)+1+G]^2>0.\]
+
+For H=2 take G=3/2 in both cases. The discriminants in Section 3.5 are
+respectively -135/4 and -719/4, and P(2) is respectively 87/4 and 71/4,
+so the bound is strict.
+
+For H≥3 use these continuous height intervals and G=r H\^{}2:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{\(m=6\), \(H\in[3,4]\), \(r=6/11\):} 6940/121, 35504/363,
+  167107/1089, 164899/726, 38799/121.
+\item
+  \textbf{\(m=6\), \(H\in[5,11]\), \(r=12/19\):} 123864/361, 291744/361,
+  582724/361, 900792/361, 528288/361.
+\item
+  \textbf{\(m=7\), \(H\in[3,13]\), \(r=14/25\):} 56224/625,
+  1355912/1875, 21209356/5625, 26783792/1875, 16447144/625.
+\end{itemize}
+
+In the first case \(q_0\)-2H≥11, and the other two cases use the first
+bound of 3.5. Every coefficient is positive. By the identity
+\(P(l+(r_0-l)u)=\sum_{j=0}^4 b_j\binom4j u^j(1-u)^{4-j}\), these
+polynomial inequalities hold throughout the respective real intervals
+(0≤u≤1). The intervals cover all admissible integer heights H≥3. No
+individual height or size check is needed for m=6,7.
+
+\subsubsection{3.7 The even cases m=4,5: large
+heights}\label{the-even-cases-m45-large-heights}
+
+For m=4 take H≥5; for m=5 take H≥7. In these ranges s=h+e≤2m implies
+0≤e≤H/2. All branches are full-charge eligible, since h\textgreater m
+and h+s≥2m. Here \(K_0\)=e(H-e)(H+2e) ≥ H\^{}2 e, so Z≥H\^{}2 e. Use
+q≥2H, c≥2h+2m, and the full-charge inequality of 3.5. The upper bound
+reduces by direct expansion to
+
+\[\begin{aligned}&-(H+2)e^2/2+b(H)e+C(H),\\ &b(H)=2Hm-H-1-H^2,\\ &C(H)=H[-5H^2+6H(m-1)+6m-1]/6.\end{aligned}\]
+
+For m=4,H=5+x (x≥0), \(b=9-3x-x^2\) and
+\(C=-10-(86/3)x-(19/2)x^2-(5/6)x^3\). For m=5,H=7+x, \(b=13-5x-x^2\) and
+\(C=-56-(185/3)x-(27/2)x^2-(5/6)x^3\). Thus b≤9 or 13 and C≤-10 or -56
+respectively, and (H+2)/2≥7/2 or 9/2. Since e≥0, completing the square
+gives the strictly negative bounds -10+81/14=-59/14 and
+-56+169/18=-839/18. This settles the entire large-height intervals
+without individual height comparisons.
+
+\subsubsection{3.8 Remaining low heights: interval
+certificates}\label{remaining-low-heights-interval-certificates}
+
+All remaining even cases are m=4,H in \{2,3,4\}, or m=5,H in
+\{2,3,4,5,6\}. We prove a finite collection of elementary inequalities
+on real size intervals, not a list of integer size/imbalance tests. Here
+h=H+1; for m=4 all remaining heights have q=9,c=19, and for m=5 all have
+q=13,c=25.
+
+On a size interval {[}l,r{]} put \(e_{\min}\)=l-h and \(E_{\max}\)=r-h.
+A useful linear lower bound for (4) is Z≥\(\alpha\) e, where
+\(\alpha\)=0 if \(E_{\max}\)=0 and otherwise
+
+\[\begin{aligned}\alpha=\max\big\{&0,\min(H^2,(H-E_{\max})(H+2E_{\max})),\\&\min((H-1)(h+e_{\min}),c/E_{\max}+(j_1-1)(2h-j_1+e_{\min}-1),2c/E_{\max})\big\},\end{aligned}\]
+
+with \(j_1\)=max(1,h-2). To verify this bound, first \(K_0\)≥0 and for
+0\textless e≤H, \(K_0\)/e=(H-e)(H+2e), a concave quadratic whose minimum
+over {[}0,\(E_{\max}\){]} is bounded below by the smaller endpoint
+value. If \(E_{\max}\)\textgreater H the endpoint value is negative and
+\(K_0\)≥0 suffices. Second, from (4), Z≥min(J,c+\(K_1\),2c); divide by
+e\textgreater0, use e≥\(e_{\min}\) and e≤\(E_{\max}\), and take the
+minimum of the resulting lower bounds. The case e=0 is immediate. This
+derivation uses no shape enumeration. In particular the displayed
+\(\alpha\) is valid for every integer size in the interval and its
+formula is also valid under the real extension of Z.
+
+For proportional branches the integer size domain is contained in the
+real interval {[}h,max(m,2m-H-2){]} (empty if lower endpoint exceeds the
+upper). For full-charge branches it is contained in
+{[}max(h,m+1,2m-H-1),2m{]}. These domains follow directly from the
+eligibility rule in 3.3; full and proportional are used according to
+that rule.
+
+Set a=H(H+2+2m)+1, \(C=-cHh/2-2\binom h3\). For proportional branches
+use the G values shown below. Their discriminants in 3.5 are, in order
+of the proportional rows, -71/4,-639/400,-36,-75,-100, so each G is
+valid for all real t≥0. For full-charge branches use 3.5 directly. The
+local upper bounds are the following quadratics in the size variable x,
+throughout the indicated closed intervals:
+
+\[Q_P(x)=-h x^2+(a+G-\alpha)x+C+\alpha h,\]
+
+\[Q_F(x)=(-h+H^2/q)x^2+(a-\alpha)x+C+\alpha h.\]
+
+\begin{longtable}[]{@{}llllll@{}}
+\toprule\noalign{}
+\(m\) & \(H\) & Rule & Size interval & \(\alpha\) & \(G\) (P only) \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+4 & 2 & P & \([3,4]\) & \(4\) & \(5/2\) \\
+4 & 2 & F & \([5,8]\) & \(19/5\) & -- \\
+4 & 3 & P & \([4,4]\) & \(0\) & \(129/20\) \\
+4 & 3 & F & \([5,8]\) & \(19/2\) & -- \\
+5 & 2 & P & \([3,6]\) & \(3\) & \(2\) \\
+5 & 2 & F & \([7,10]\) & \(25/7\) & -- \\
+5 & 3 & P & \([4,5]\) & \(9\) & \(5\) \\
+5 & 3 & F & \([6,10]\) & \(25/3\) & -- \\
+5 & 4 & P & \([5,5]\) & \(0\) & \(10\) \\
+5 & 4 & F & \([6,10]\) & \(10\) & -- \\
+5 & 5 & F & \([6,10]\) & \(13\) & -- \\
+5 & 6 & F & \([7,10]\) & \(36\) & -- \\
+\end{longtable}
+
+The same rows, with their quadratic certificates and maxima:
+
+\begin{longtable}[]{@{}lllll@{}}
+\toprule\noalign{}
+\(m\) & \(H\) & Rule & \(Q(x)\) & Maximum \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+4 & 2 & P & \(-3x^2+47x/2-47\) & \(-47/48\) \\
+4 & 2 & F & \(-23x^2/9+106x/5-238/5\) & \(-247/45\) \\
+4 & 3 & P & \(-4x^2+929x/20-122\) & \(-1/5\) \\
+4 & 3 & F & \(-3x^2+61x/2-84\) & \(-311/48\) \\
+5 & 2 & P & \(-3x^2+28x-68\) & \(-8/3\) \\
+5 & 2 & F & \(-35x^2/13+178x/7-464/7\) & \(-1839/91\) \\
+5 & 3 & P & \(-4x^2+42x-122\) & \(-12\) \\
+5 & 3 & F & \(-43x^2/13+113x/3-374/3\) & \(-692/39\) \\
+5 & 4 & P & \(-5x^2+75x-270\) & \(-20\) \\
+5 & 4 & F & \(-49x^2/13+55x-220\) & \(-3795/196\) \\
+5 & 5 & F & \(-53x^2/13+73x-337\) & \(-2167/212\) \\
+5 & 6 & F & \(-55x^2/13+73x-343\) & \(-6183/220\) \\
+\end{longtable}
+
+The last column follows in every row by completing the square, with the
+vertex clipped to the displayed closed interval. These explicit
+elementary inequalities establish strict negativity without evaluating
+each integer size or imbalance. For two proportional domains only a
+singleton size is admissible; those are ordinary boundary cases of the
+same formula.
+
+The remaining low-height case is m=4,H=4. Here h=5,s=5+e, 0≤e≤3, and
+only full charging is possible. The upper bound before subtracting Z is
+
+\[U(e)=-29(5+e)^2/9+57(5+e)-210.\]
+
+For 0≤e≤2, use Z≥\(K_0\)=e(4-e)(4+2e). The polynomial
+\(K_0-U=-2e^3+65e^2/9-79e/9+50/9\) is strictly positive on this full
+interval: in the degree-three Bernstein basis its coefficients on
+{[}0,1{]} are 50/9,71/27,19/9,2, and on {[}1,2{]} are 2,17/9,59/27,8/9,
+all positive. For 2≤e≤3, U is increasing and U(3)=358/9\textless40.
+Meanwhile J=3e(5+e)≥42 and c+\(K_1\)=19+2e(6+e)≥51. The expression
+\(K_0\)+2(c-2(s-1))=\(K_0\)+22-4e is concave on {[}2,3{]} and its
+endpoints are 46 and 40. Thus the third term in the minimum in (4) is at
+least 40, giving Z≥40. Hence U-Z\textless0 throughout this interval too.
+
+This exhausts the small even parameter range by explicit inequalities,
+and Section 3.4 transfers every odd case. Section 3.3 then gives strict
+global dominance over all tight non-B trees. The strict loss of
+nontrivial branches and of unbalanced leaf-only arrangements proves
+uniqueness, since every maximizer is tight. No program-generated finite
+integer certificate is a premise of the proof. The ordinary finite
+algebraic cases, interval endpoint evaluations and coefficient
+identities remain part of the proof; no claim of a case-free proof is
+made.
+
+\subsection{4. Sharpness}\label{sharpness}
+
+At d=D-1, take L=m and R=k-m, with a height-2 branch of size
+\(s=\lfloor m/2\rfloor+1\) at position 2 (one root and s-1 leaves), the
+remaining m-s extra leaves at position 1, and R extra leaves at d-1.
+This is tight and retains diameter d.~Since d≥10 for k≥7, the three
+distinct vertices adjacent to leaves (including path positions 1,d-1)
+certify that this is not B. Here A=1, I=0, and \(P=2s(m+2-s)=Q\),
+exactly (all other branches are single leaves, LCA within the branch is
+1). \(W(T)-W(B)=Q-k-d=0\). Thus B is not uniquely maximizing at d=D-1,
+even if some third tree is strictly better. Combined with strict
+dominance at all d≥D, this proves the claimed persistent threshold. No
+assertion that B is globally maximizing at d=D-1 is needed.
+
+\section{Part II. Supporting exact algorithms (Theorems
+1--4)}\label{part-ii.-supporting-exact-algorithms-theorems-14}
+
+The following retains the reviewed v0.8 mathematical argument, with a
+scope clarification referring to Theorem 5. Symbols are local to each
+part.
+
+\subsection{Scope and notation}\label{scope-and-notation}
+
+Let T be an unweighted finite tree of order n and diameter d (number of
+edges). For n≥3 the feasible values are 2≤d≤n-1; (1,0),(2,1) are
+trivial. Put k=n-d-1. W(T) is the sum of distances over unordered vertex
+pairs, and M(n,d) its maximum over such trees. No claim about all
+connected graphs is made.
+
+\subsection{\texorpdfstring{Theorem 1 (exact value in \(O((k+1)^3)\)
+integer
+operations)}{Theorem 1 (exact value in O((k+1)\^{}3) integer operations)}}\label{theorem-1-exact-value-in-ok13-integer-operations}
+
+Fix an oriented diameter path P with coordinates \(0,\ldots,d\). Each
+connected component off P attaches by one edge at a position x. Its
+height h includes the attachment edge, so 1≤h≤min(x,d-x). These
+inequalities are also sufficient to retain diameter exactly d: within a
+component distances are at most \(2h\le d\), and between components at
+\(x\le y\) the distances are at most \(h_x+y-x+h_y\le d\). The path P
+still witnesses diameter d.~This includes components attached at the
+same vertex.
+
+For a component of size s moved to position x, with every other
+attachment fixed, its contribution to W as a function of x has the form
+\(s(x^2-dx)+\sum_j ss_j|x-x_j|+\text{constant}\). This follows by
+summing distances to P, and then to every other component. It is
+strictly convex, so if h\textless x\textless d-h, at least one endpoint
+of the feasible interval gives a strict improvement. Consequently in
+every maximizer every component is at x=h or d-h, relative to any chosen
+diameter path. This endpoint condition is related to the diametral-path
+condition of Borovićanin et al.~{[}1, Lemma 2.1{]} and Pandey and Ravi
+{[}2, Theorem 3.8{]}. No novelty for this lemma is asserted.
+
+Let \(H=\min(k,\lfloor d/2\rfloor)\) and let \(X\) be the sorted set
+\(\{0,d\}\cup\{i,d-i:1\le i\le H\}\). Every maximizer has a
+representation in X. At position x, arbitrary attached rooted forests of
+total size s with height at most \(h_x\)=min(x,d-x,H) are allowed. This
+is a relaxation of endpoint tightness but every represented tree is
+feasible and all maximizers are represented, so optimizing over it is
+exact.
+
+Set q(t)=t(n-t). The edge-cut formula \(W(T)=\sum_e q(t_e)\) follows by
+counting each unordered pair once for each edge on its path. For the
+contribution of all non-spine edges in an attached forest of size s and
+height at most h, define \(F_h\)(s). \(F_h(0)=0\); \(F_0(s)=-\infty\)
+for \(s>0\). Decompose a nonempty forest into a first branch of size t
+and the remainder. Its attachment edge contributes q(t); the descendants
+are a forest of size t-1 and height at most h-1. Thus
+
+\[F_h(s)=\max_{1\le t\le s}\{q(t)+F_{h-1}(t-1)+F_h(s-t)\}.\]
+
+All terms realize feasible forests when finite; conversely every forest
+yields a term. Evaluate increasing h, then increasing s. Infeasible
+terms are skipped.
+
+For consecutive x\textless y in X and total p extra vertices allocated
+through x, the spine edges from j to j+1, x≤j\textless y, have
+left-component size j+1+p.~Their summed contribution is
+\(G(x,y,p)=\sum_{j=x}^{y-1}q(j+1+p)\). Compute in constant arithmetic
+operations using the sums of integers and squares. Write
+\(X=(x_0,\ldots,x_m)\). \(D_0(0)=0\), \(D_0(p)=-\infty\) for \(p>0\),
+and
+
+\[D_{i+1}(z)=\max_{0\le p\le z}\{D_i(p)+F_{h_{x_i}}(z-p)+G(x_i,x_{i+1},z)\}.\]
+
+Inductively \(D_i\) represents the best contributions up to (but not
+including attachments at) \(x_i\). The final endpoint d cannot have
+attachments; \(D_m\)(k)=M(n,d). F has \(O((k+1)^2)\) states, \(O(k+1)\)
+transitions each; D has \(O((k+1)^2)\) states, \(O(k+1)\) transitions
+each. The coordinate set has \(O(k+1)\) members, generated and sorted
+without enumerating the full path. Scores and intermediates have
+\(O(\log(n+1))\) bits. The value computation takes \(O((k+1)^3)\)
+integer operations, \(O((k+1)^2)\) integers of storage; schoolbook
+arithmetic yields \(O((k+1)^3\log^2(n+1))\) bit operations (a
+conventional random-access arithmetic model). Explicit n-vertex output
+is not claimed in this complexity.
+
+\subsection{Theorem 2 (all equality
+cases)}\label{theorem-2-all-equality-cases}
+
+In the F recurrence retain every feasible transition attaining equality
+with the state optimum. Recursively construct a branch from an optimal
+forest at (h-1,t-1) and an optimal remainder at (h,s-t). \(F_h\)(0)
+gives the empty forest. Unordered children are encoded as sorted tuples;
+repeated equal children are retained with multiplicity. In D retain
+every equality transition and combine all optimal forest choices with
+all optimal prefixes. All recursions terminate because size decreases or
+path position advances. The result is exactly the set of maximizing
+oriented diameter-path representations, up to rooted forest
+permutations. Necessity follows by replacement: a suboptimal forest or
+prefix would strictly improve the final score with the remaining choices
+fixed. Sufficiency follows by summing equality transitions and the
+edge-cut formula. The endpoint tightness proof ensures no global
+maximizer is missed.
+
+To remove duplicates from different diameter paths, compress maximal
+degree-two chains to edges weighted by their lengths. Use the
+lexicographically least rooted encoding over every vertex of the
+weighted skeleton, with a rooted encoding equal to the sorted tuple of
+(edge length, child encoding). Weighted rooted encodings characterize
+rooted isomorphism by induction; taking the minimum over roots
+characterizes unrooted weighted isomorphism. Subdivision recovers the
+original tree uniquely. The weighted skeleton has \(O(k+1)\) vertices: a
+representation before suppression uses at most k off-path vertices, k
+nonempty attachment positions, and 2 endpoints. Consequently this
+provides an exact compressed representation even for huge d.~Equality
+transitions can be kept as a polynomial-size implicit grammar
+(\(O((k+1)^3)\) transitions, each \(O(\log(n+1))\) bits). Enumeration of
+all distinct outputs need not run in polynomial time and is not claimed
+to do so. The implementation uses explicit sets and recursion for small
+enumeration tests.
+
+\subsection{Theorem 3 (balanced double-broom uniqueness
+decision)}\label{theorem-3-balanced-double-broom-uniqueness-decision}
+
+For d≥3 let B(k,d) attach \(\lfloor k/2\rfloor\) and
+\(\lceil k/2\rceil\) leaves to x=1 and x=d-1 of a diameter path. Its
+value is
+\[\begin{aligned}W_B={}&\binom{d+2}{3}+k[d(d+1)/2+2]\\&+2\left[\binom{\lfloor k/2\rfloor}{2}+\binom{\lceil k/2\rceil}{2}\right]+\lfloor k/2\rfloor\lceil k/2\rceil d.\end{aligned}\]
+For d=3 the same description applies to a double star; d=2 is separately
+the unique star. Every diameter of B for d≥3 is between leaves on
+opposite ends, so its marked representations have no attachments
+elsewhere, and the counts at x=1 are \(\lfloor k/2\rfloor\) or
+\(\lceil k/2\rceil\). Conversely these local conditions force B. At both
+x=1,d-1 allowed forests have height ≤1. Add a Boolean bad to D: set bad
+if at x=1 the assigned size is neither balanced count, or if any nonzero
+assignment occurs outside \{1,d-1\}. This works for k≥1 (k=0 is a path).
+Then \(D_m\)(k,false)=\(W_B\) and \(D_m\)(k,true) is the maximum over
+non-B compressed candidates (or infeasible). Thus B is the unique global
+maximizer iff true is infeasible or strictly below false. The same cubic
+complexity holds. This is not a polynomial uniqueness decision for
+arbitrary non-B maximizers, nor is true necessarily the second-best
+value over all trees.
+
+\subsection{Theorem 4 (algorithm for the exact persistent threshold at
+each given
+k)}\label{theorem-4-algorithm-for-the-exact-persistent-threshold-at-each-given-k}
+
+For fixed k≥2 and d≥\(d_0\)=2k, the finite family of tight endpoint
+placements is independent of d as abstract rooted branches of height
+\(h_i\) and side assignments. At \(d_0\) a left/right location can
+coincide only for a branch of height k; its size is then k and no other
+branch exists. Either side assignment is valid. In the family every
+member is feasible for every d≥\(d_0\) and every maximizer belongs to
+the family.
+
+Write L,R for total extra vertices on the respective sides, \(s_i\) for
+branch size, \(h_i\) for its height, and \(D_i\) for the sum of depths
+measured from its attachment. Pair distances yield
+
+\[W=\binom{d+2}{3}+kd(d+1)/2+ad+b,\]
+
+\[a=LR-\sum_i(s_i h_i-D_i).\]
+
+Indeed the sum of distances from one off-path vertex of depth ell to P
+is \(d(d+1)/2+x^2-dx+(d+1)\ell\); at either tight position
+\(x^2-dx=h_i^2-dh_i\). Pairs of extras on opposite sides contribute a
+unit slope, pairs on the same side or inside one branch have constant
+distance. Thus a≤\(\lfloor k^2/4\rfloor\), with equality iff L,R
+balanced and every depth in each component equals its height; because
+depth 1 occurs, this forces all branches to be single leaves. So B is
+the unique isomorphism class of maximum slope. Each non-B tight pattern
+has integer slope at least 1 below B. As above, a non-B pattern cannot
+become B under diameter extension, since all diameter representations of
+B have only balanced single-leaf attachments.
+
+Consequently uniqueness of B is monotone for d≥\(d_0\), and once
+certified it holds for all larger d.~At \(d_0\) every candidate's
+distance sum over pairs involving an extra vertex is between 0 and
+\(U=d_0[k(d_0+1)+k(k-1)/2]\); all candidates share the spine
+contribution. At \(d_0\)+U+1 every non-B pattern has strictly smaller
+score, so this is a constructive tail bound \(O(k^3)\). Binary search
+using Theorem 3 finds first unique d in {[}\(d_0\),\(d_0\)+U+1{]} if B
+is not unique at \(d_0\). If it is already unique there, scan
+d=3,\ldots,\(d_0\)-1 and return one more than the last failure (or 3 if
+none). If it is not unique at \(d_0\), no earlier failure matters for
+the persistent threshold. This computes the smallest D≥3 such that B is
+uniquely optimal for every d≥D, in \(O((k+1)^4)\) integer operations and
+\(O((k+1)^2)\) integers of working storage; \(O(k)\) calls plus
+\(O(\log(k+1))\) binary-search calls. For k=0,1 every maximizer for d≥3
+is B by the endpoint lemma, so D=3. Theorem 4 itself is an algorithmic
+result; the separate sharp-threshold theorem in Part I gives a closed
+formula for k≥7.
+
+\section{Related work and
+limitations}\label{related-work-and-limitations}
+
+The final journal version of {[}1{]} (online 11 September 2026, journal
+pp.~1--16) was examined directly. Theorem 2.13 (p.~10) and Proposition
+2.15 (p.~13) state sufficient and obstruction bounds, rather than the
+exact persistent threshold above. Section 3 notes a positive answer to
+Question 3.1 attributed to personal communication {[}1, ref. 5{]}; the
+proof is not printed there. No claim about general graphs or the
+unpublished communication is made here. The endpoint lemma is related to
+{[}1, Lemma 2.1{]}, {[}2, Theorem 3.8{]} and {[}3, Lemma 4.1{]}.
+
+Sun et al.~{[}4{]} give an earlier sufficient condition in general
+graphs; the condition was checked through {[}1{]}, not the original full
+text. Wang and Guo {[}5{]} and Mukwembi and Vetrík {[}6{]} treat
+particular diameter regimes. Cambie {[}3{]} gives asymptotic results.
+The anonymous candidate {[}7{]} offers a complementary exact algorithm
+polynomial in log(n+1) for fixed d, with d-dependent preprocessing and
+constants (Corollary 4.2); its integer-programming step is not
+implemented (p.~7). It also reports a branch DP for small diameters and
+a diameter-five classification (Theorem 8.1). For fixed \(d\) and large
+\(n\), our cubic-in-\(k\) bound is polynomial in \(n\), not in
+\(\log n\). No measured advantage or chronological priority over {[}7{]}
+is claimed. Its supplied manuscript was read but its proofs were not
+independently verified. The literature search is partial; no claim of
+historical priority is made.
+
+\section{Verification and scholarly
+status}\label{verification-and-scholarly-status}
+
+\begin{itemize}
+\tightlist
+\item
+  Theorems 1--4: independent AI review of v0.6 reported CONDITIONAL
+  PASS; no mathematical gap found. Independent full-tree comparison
+  through n=21 covered 190 (n,d) conditions with agreement on maximum
+  and number of maximizing isomorphism classes. Parent-array enumeration
+  for k=8 was interrupted. Some console outputs were transcribed.
+  Editorial/literature delta of v0.8 was accepted; no full re-audit was
+  claimed.
+\item
+  Theorem 5: separate independent AI review of the exact v0.13 proof
+  (SHA256 recorded in the reproduction archive) reported CONDITIONAL
+  PASS, no counterexample or proof defect found. The reviewer re-derived
+  Sections 1, 2, 3.3 and 3.4 and checked other algebra using independent
+  exact computations. Reported checks: 14,289,555 integer points for
+  Section 2, 5,161,833 Z-lemma examples, k=7--60 independent DP, k=7--40
+  BFS tie witnesses, 153 small-tree uniqueness comparisons, all with no
+  reported mismatch. No Lean/formal verification or human review. The
+  SymPy part of sec2\_check.py was not run; Fraction checks were used.
+  These reports and their saved logs are held privately; the larger
+  independent checks are not rerun by the public package.
+\item
+  Author Windows runs: v0.6 and v0.13, both FULL PASS; six script
+  outputs agree with their frozen baseline logs (elapsed lines omitted).
+  v0.13 includes 1,612 branch inputs, 285,701 marked tight-forest
+  representations, 18 boundary instances and six BFS witnesses. Marked
+  representations are not distinct unmarked tree isomorphism classes. A
+  tie witness at D−1 is not necessarily globally optimal.
+\item
+  The author-side algorithm replay covers 32,506 trees of order at most
+  16, 105 parameter pairs and 115 maximizing isomorphism classes summed
+  over pairs, and nine giant-diameter structure checks. The verification
+  is finite and does not replace the proofs.
+\item
+  The formal journal version of Borovićanin et al., published online 11
+  September 2026, was supplied and inspected. Theorem 2.13 and
+  Proposition 2.15 retain the stated sufficient and obstruction bounds.
+  No identical sharp persistent threshold was found in those statements;
+  no exhaustive priority claim is made. The formal edition also
+  attributes an affirmative answer to its general-graph Question 3.1 to
+  personal communication; its proof is not included. The general-graph
+  question is outside scope.
+\item
+  NOT HUMAN PEER REVIEWED / NOVELTY INCONCLUSIVE / REFERENCES PARTIAL /
+  All rights reserved.
+\end{itemize}
+
+\section{References}\label{references}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  B. Borovićanin, D. Božović, E. Glogić, D. Mesarič Štesl, S. Špacapan
+  and E. Zogić. New results on Wiener index of trees with a given
+  diameter. \emph{Quaestiones Mathematicae} (2026), 1--16, published
+  online 11 September 2026.
+  https://doi.org/10.2989/16073606.2026.2718457. Preprint:
+  https://arxiv.org/abs/2507.17885.
+\item
+  D. Pandey and P. S. Ravi. On a conjecture of DeLaVina and Waller.
+  arXiv:2605.24855 (2026). https://arxiv.org/abs/2605.24855.
+\item
+  S. Cambie. An asymptotic resolution of a problem of Plesník. \emph{J.
+  Combin. Theory Ser. B} 145 (2020), 341--358.
+  https://arxiv.org/abs/1811.08334.
+\item
+  Q. Sun, B. Ikica, R. Škrekovski and V. Vukašinović. Graphs with a
+  given diameter that maximise the Wiener index. \emph{Applied
+  Mathematics and Computation} 356 (2019), 438--448.
+\item
+  S. Wang and X. Guo. Trees with extremal Wiener indices. \emph{MATCH
+  Commun. Math. Comput. Chem.} 60 (2008), 609--622.
+\item
+  S. Mukwembi and T. Vetrík. Wiener index of trees of given order and
+  diameter at most 6. \emph{Bull. Aust. Math. Soc.} 89 (2014), 379--396.
+\item
+  Anonymous. The maximum Wiener index of trees with prescribed diameter:
+  the sharp second-order constant. Candidate manuscript, November 2026.
+  DOI printed on supplied PDF: 10.5281/zenodo.24520149 (public timestamp
+  and priority not established here).
+\end{enumerate}
+
+Copyright © 2026 Ryutaro Yonezu. All rights reserved.
+
+\end{document}
